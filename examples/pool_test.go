@@ -6,6 +6,8 @@ import (
 	"context"
 	"github.com/go-errors/errors"
 	"reflect"
+	"time"
+	"fmt"
 )
 
 func TestUnitPoolInvalidWorkerSize(t *testing.T){
@@ -58,30 +60,28 @@ func TestUnitPool(t *testing.T){
 		return v,nil
 	})
 
+	for _,val := range testInput{
+		t.Log("job id:",pool.AddNewJob(context.Background(),val))
+	}
 
 	go func() {
 		for {
 			select {
-				case out := <- pool.Output:
-					o,e := out.GetOutput()
-					t.Logf("id: %v ,input: %v, output: %v , err: %v",out.GetID(),out.GetInput(),o,e)
+				case out := <-pool.Output:
+					o, e := out.GetOutput()
+					fmt.Println("id:", out.GetID(),"input:", out.GetInput(),"output:", o, "error:",e)
 
-				case <- endTest:
+				case <-endTest:
 					return
-			}
+				}
 		}
-
 	}()
-	for _,val := range testInput{
-		pool.AddNewJob(context.Background(),val)
-	}
+
+
+	time.Sleep(time.Second*8)
 
 	endTest <- true
 
 	pool.Close(context.Background())
-
-	select {
-
-	}
 
 }
