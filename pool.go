@@ -54,4 +54,19 @@ func NewPool(maxWorkers,buffersize int)(p *Pool,err error){
  */
 func (p *Pool)Init(ctx context.Context,processFunc func(ctx context.Context,in interface{})(out interface{},err error)){
 	p.processFunc = processFunc
+
+	for i := 0; i < p.workers; i ++{
+		worker := &worker{
+			id: uuid.New(),
+			pool: p,
+		}
+
+		worker.Run()
+
+
+
+
+
+
+	}
 }

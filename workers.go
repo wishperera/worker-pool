@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type Worker struct {
+type worker struct {
 	id uuid.UUID
 	pool *Pool
 }
@@ -14,9 +14,9 @@ type Worker struct {
 /*
 	Func run()
 	----------
-	run the worker as a go routine untill the pool is closed.
+	run the Worker as a go routine untill the pool is closed.
  */
-func (w *Worker)run(){
+func (w *worker)Run(){
 	go func() {
 		fmt.Printf("starting worker, poolID: %v, workerID: %v",w.pool.id,w.id)
 		for{
@@ -38,3 +38,4 @@ func (w *Worker)run(){
 
 	}()
 }
+
