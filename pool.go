@@ -4,15 +4,21 @@ import (
 	"github.com/go-errors/errors"
 	"strconv"
 	"context"
+	"sync"
+	"github.com/google/uuid"
 )
 
 type Pool struct {
-	input chan interface{}
-	output chan interface{}
-	error  chan error
+	id uuid.UUID
+	input chan Job
+	output chan Job
 	workers int  // maximum number of workers
 	bufferSize int //  buffer size for all channels
+	processFunc func(ctx context.Context,in interface{})(out interface{},err error)
+	wGroup sync.WaitGroup
+	closeWorkers chan bool
 }
+
 
 /*
 	Func NewPol(maxWorkers,buffersize int)(p *Pool,err error)
@@ -32,15 +38,20 @@ func NewPool(maxWorkers,buffersize int)(p *Pool,err error){
 	}
 
 	return &Pool{
-		input: make(chan interface{},buffersize),
-		output: make(chan interface{},buffersize),
-		error: make(chan error,buffersize),
+		input: make(chan Job,buffersize),
+		output: make(chan Job,buffersize),
+		closeWorkers: make(chan bool),
 		workers: maxWorkers,
 		bufferSize: buffersize,
 	},nil
 }
 
-
-func (p *Pool)Init(ctx context.Context){
-
+/*
+	Func Init(ctx context.Context,processFunc func(ctx context.Context,in interface{})(out interface{},err error))
+	--------------------------------------------------------------------------------------------------------------
+	intiailize the pool with a process function that accepts a context and the function parameters as a interface.
+    parameter can be a single value or a structure in case of multiple expected inputs, same goes for output.
+ */
+func (p *Pool)Init(ctx context.Context,processFunc func(ctx context.Context,in interface{})(out interface{},err error)){
+	p.processFunc = processFunc
 }
