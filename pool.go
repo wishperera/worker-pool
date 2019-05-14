@@ -6,6 +6,7 @@ import (
 	"context"
 	"sync"
 	"github.com/google/uuid"
+	"fmt"
 )
 
 type Pool struct {
@@ -47,7 +48,7 @@ func NewPool(maxWorkers,buffersize int)(p *Pool,err error){
 }
 
 /*
-	Func Init(ctx context.Context,processFunc func(ctx context.Context,in interface{})(out interface{},err error))
+	Func (p *Pool)Init(ctx context.Context,processFunc func(ctx context.Context,in interface{})(out interface{},err error))
 	--------------------------------------------------------------------------------------------------------------
 	intiailize the pool with a process function that accepts a context and the function parameters as a interface.
     parameter can be a single value or a structure in case of multiple expected inputs, same goes for output.
@@ -61,12 +62,30 @@ func (p *Pool)Init(ctx context.Context,processFunc func(ctx context.Context,in i
 			pool: p,
 		}
 
-		worker.Run()
-
-
-
-
-
-
+		worker.run()
+		p.wGroup.Add(1)
 	}
+
+	fmt.Printf("worker pool successfully initialized with, pool_id: %v, workers_count: %v, buffer_size: %v",p.id,p.workers,p.bufferSize)
+
+}
+
+
+
+/*
+	Func (p *Pool)Close(ctx context.Context)
+	---------------------------------------
+    shut down the pool gracefully after waiting all worker routines to close.
+ */
+func (p *Pool)Close(ctx context.Context){
+	for i := 0; i < p.workers; i++{
+		p.closeWorkers <- true
+	}
+
+	p.wGroup.Wait()
+	close(p.closeWorkers)
+	close(p.input)
+	close(p.output)
+	fmt.Printf("worker pool gracefully shut down, pool_id: %v",p.id)
+
 }

@@ -16,7 +16,7 @@ type worker struct {
 	----------
 	run the Worker as a go routine untill the pool is closed.
  */
-func (w *worker)Run(){
+func (w *worker)run(){
 	go func() {
 		fmt.Printf("starting worker, poolID: %v, workerID: %v",w.pool.id,w.id)
 		for{
