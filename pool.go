@@ -1,3 +1,5 @@
+//worker pool is a simple go library to intergrate a  limited routine process in to your
+//golang application.
 package worker_pool
 
 import (

@@ -1,4 +1,4 @@
-package examples
+package worker_pool_test
 
 import (
 	"testing"
