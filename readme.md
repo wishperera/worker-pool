@@ -43,3 +43,4 @@ golang application.
    original input,output and the possible errors. The `GetID` method returns a unique id to the Job that 
    can be used to align the input with output.
    
+- more documentation can be found [here](/doc/index.html)
