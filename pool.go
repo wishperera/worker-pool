@@ -12,7 +12,7 @@ import (
 type Pool struct {
 	id uuid.UUID
 	input chan Job
-	output chan Job
+	Output chan Job
 	workers int  // maximum number of workers
 	bufferSize int //  buffer size for all channels
 	processFunc func(ctx context.Context,in interface{})(out interface{},err error)
@@ -40,7 +40,7 @@ func NewPool(maxWorkers,buffersize int)(p *Pool,err error){
 
 	return &Pool{
 		input: make(chan Job,buffersize),
-		output: make(chan Job,buffersize),
+		Output: make(chan Job,buffersize),
 		closeWorkers: make(chan bool),
 		workers: maxWorkers,
 		bufferSize: buffersize,
@@ -55,7 +55,7 @@ func NewPool(maxWorkers,buffersize int)(p *Pool,err error){
  */
 func (p *Pool)Init(ctx context.Context,processFunc func(ctx context.Context,in interface{})(out interface{},err error)){
 	p.processFunc = processFunc
-
+	p.id = uuid.New()
 	for i := 0; i < p.workers; i ++{
 		worker := &worker{
 			id: uuid.New(),
@@ -66,7 +66,7 @@ func (p *Pool)Init(ctx context.Context,processFunc func(ctx context.Context,in i
 		p.wGroup.Add(1)
 	}
 
-	fmt.Printf("worker pool successfully initialized with, pool_id: %v, workers_count: %v, buffer_size: %v",p.id,p.workers,p.bufferSize)
+	fmt.Println("worker pool successfully initialized with, pool_id: ",p.id, "workers_count: ",p.workers, "buffer_size:",p.bufferSize)
 
 }
 
@@ -85,7 +85,23 @@ func (p *Pool)Close(ctx context.Context){
 	p.wGroup.Wait()
 	close(p.closeWorkers)
 	close(p.input)
-	close(p.output)
-	fmt.Printf("worker pool gracefully shut down, pool_id: %v",p.id)
+	close(p.Output)
+	fmt.Println("worker pool gracefully shut down, pool_id:",p.id)
 
+}
+
+
+/*
+	FuncAddNewJob(ctx context.Context,input interface{})(jobID uuid.UUID)
+	---------------------------------------------------------------------
+    adds a new job to the process queue. will panic if the pool is not
+    initialized using pool.Init(). Returns the job id for future use.
+ */
+func (p *Pool)AddNewJob(ctx context.Context,input interface{})(jobID uuid.UUID){
+	if p.processFunc == nil{
+		panic("process function empty in pool,please initialize using pool.Init()")
+	}
+	jb := newJob(ctx,input)
+	p.input <- jb
+	return jb.id
 }

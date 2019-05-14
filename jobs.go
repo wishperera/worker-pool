@@ -15,12 +15,12 @@ type Job struct {
 
 
 /*
-	Func NewJob(ctx context.Context,in interface{})(j *Job)
+	Func newJob(ctx context.Context,in interface{})(j *Job)
 	------------------------------------------------------
 	Returns a pointer to a Job object with provided input.
  */
-func NewJob(ctx context.Context,in interface{})(j *Job){
-	return &Job{
+func newJob(ctx context.Context,in interface{})(j Job){
+	return Job{
 		id: uuid.New(),
 		input: in,
 		output:nil,
@@ -29,15 +29,15 @@ func NewJob(ctx context.Context,in interface{})(j *Job){
 }
 
 
-func (j *Job)GetOutput()(output interface{},err error){
+func (j Job)GetOutput()(output interface{},err error){
 	return  j.output,j.err
 }
 
-func (j *Job)GetInput()(input interface{}){
+func (j Job)GetInput()(input interface{}){
 	return j.input
 }
 
-func (j *Job)GetID()(uuid.UUID){
+func (j Job)GetID()(uuid.UUID){
 	return j.id
 }
 

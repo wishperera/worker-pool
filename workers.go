@@ -18,12 +18,12 @@ type worker struct {
  */
 func (w *worker)run(){
 	go func() {
-		fmt.Printf("starting worker, poolID: %v, workerID: %v",w.pool.id,w.id)
+		fmt.Println("starting worker, poolID:", w.pool.id,"workerID:",w.id)
 		for{
 			select{
 			case job := <- w.pool.input:
 				res,err := w.pool.processFunc(job.ctx,job.input)
-				w.pool.output <- Job{
+				w.pool.Output <- Job{
 					ctx: job.ctx,
 					id:  job.id,
 					output: res,
@@ -31,8 +31,9 @@ func (w *worker)run(){
 				}
 
 			case _ = <-w.pool.closeWorkers:
-				fmt.Printf("closing down worker, poolID: %v , workerID: %v" ,w.pool.id,w.id)
+				fmt.Println("shutting down worker, poolID:",w.pool.id, "workerID:" ,w.id)
 				w.pool.wGroup.Done()
+				return
 			}
 		}
 
