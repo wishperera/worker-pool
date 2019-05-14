@@ -20,13 +20,9 @@ type Pool struct {
 	closeWorkers chan bool
 }
 
-/*
-	Func NewPol(maxWorkers,buffersize int)(p *Pool,err error)
-	---------------------------------------------------------
-	returns a pointer to pool object with the input,output and
-    error channels size set to the buffersize and routines count
-    limited to workers
-*/
+//returns a pointer to pool object with the input,output and
+//error channels size set to the buffersize and routines count
+//limited to workers
 func NewPool(maxWorkers, buffersize int) (p *Pool, err error) {
 
 	if buffersize < 0 {
@@ -46,10 +42,9 @@ func NewPool(maxWorkers, buffersize int) (p *Pool, err error) {
 	}, nil
 }
 
-/*
-intiailize the pool with a process function that accepts a context and the function parameters as a interface.
-parameter can be a single value or a structure in case of multiple expected inputs, same goes for output.
-*/
+
+//intiailize the pool with a process function that accepts a context and the function parameters as a interface.
+//parameter can be a single value or a structure in case of multiple expected inputs, same goes for output.
 func (p *Pool) Init(ctx context.Context, processFunc func(ctx context.Context, in interface{}) (out interface{}, err error)) {
 	p.processFunc = processFunc
 	p.id = uuid.New()
@@ -67,11 +62,8 @@ func (p *Pool) Init(ctx context.Context, processFunc func(ctx context.Context, i
 
 }
 
-/*
-	Func (p *Pool)Close(ctx context.Context)
-	---------------------------------------
-    shut down the pool gracefully after waiting all worker routines to close.
-*/
+
+//shut down the pool gracefully after waiting all worker routines to close.
 func (p *Pool) Close(ctx context.Context) {
 	for i := 0; i < p.workers; i++ {
 		p.closeWorkers <- true
@@ -85,10 +77,9 @@ func (p *Pool) Close(ctx context.Context) {
 
 }
 
-/*
-adds a new job to the process queue. will panic if the pool is not
-initialized using pool.Init(). Returns the job id for future use.
-*/
+
+//adds a new job to the process queue. will panic if the pool is not
+//initialized using pool.Init(). Returns the job id for future use.
 func (p *Pool) AddNewJob(ctx context.Context, input interface{}) (jobID uuid.UUID) {
 	if p.processFunc == nil {
 		panic("process function empty in pool,please initialize using pool.Init()")

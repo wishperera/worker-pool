@@ -10,9 +10,8 @@ type worker struct {
 	pool *Pool
 }
 
-/*
-run the Worker as a go routine untill the pool is closed.
-*/
+
+//run the Worker as a go routine untill the pool is closed.
 func (w *worker) run() {
 	go func() {
 		fmt.Println("starting worker, poolID:", w.pool.id, "workerID:", w.id)

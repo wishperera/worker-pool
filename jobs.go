@@ -13,9 +13,8 @@ type Job struct {
 	err    error
 }
 
-/*
-Returns a pointer to a Job object with provided input.
-*/
+
+//Returns a pointer to a Job object with provided input.
 func newJob(ctx context.Context, in interface{}) (j Job) {
 	return Job{
 		id:     uuid.New(),
@@ -25,14 +24,17 @@ func newJob(ctx context.Context, in interface{}) (j Job) {
 	}
 }
 
+// get the output and the error returned by the process function
 func (j Job) GetOutput() (output interface{}, err error) {
 	return j.output, j.err
 }
 
+// get the input passed to the process function
 func (j Job) GetInput() (input interface{}) {
 	return j.input
 }
 
+// returns a id that can uniquely address the job
 func (j Job) GetID() uuid.UUID {
 	return j.id
 }
