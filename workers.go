@@ -1,7 +1,7 @@
 package worker_pool
 
 import (
-	"fmt"
+	"log"
 	"github.com/google/uuid"
 )
 
@@ -14,7 +14,7 @@ type worker struct {
 //run the Worker as a go routine untill the pool is closed.
 func (w *worker) run() {
 	go func() {
-		fmt.Println("starting worker, poolID:", w.pool.id, "workerID:", w.id)
+		log.Println("starting worker, poolID:", w.pool.id, "workerID:", w.id)
 		for {
 			select {
 			case job := <-w.pool.input:
@@ -28,7 +28,7 @@ func (w *worker) run() {
 				}
 
 			case _ = <-w.pool.closeWorkers:
-				fmt.Println("shutting down worker, poolID:", w.pool.id, "workerID:", w.id)
+				log.Println("shutting down worker, poolID:", w.pool.id, "workerID:", w.id)
 				w.pool.wGroup.Done()
 				return
 			}

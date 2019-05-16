@@ -4,11 +4,11 @@ package worker_pool
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-errors/errors"
 	"github.com/google/uuid"
 	"strconv"
 	"sync"
+	"log"
 )
 
 type Pool struct {
@@ -60,7 +60,7 @@ func (p *Pool) Init(ctx context.Context, processFunc func(ctx context.Context, i
 		p.wGroup.Add(1)
 	}
 
-	fmt.Println("worker pool successfully initialized with, pool_id: ", p.id, "workers_count: ", p.workers, "buffer_size:", p.bufferSize)
+	log.Println("worker pool successfully initialized with, pool_id: ", p.id, "workers_count: ", p.workers, "buffer_size:", p.bufferSize)
 
 }
 
@@ -75,7 +75,7 @@ func (p *Pool) Close(ctx context.Context) {
 	close(p.closeWorkers)
 	close(p.input)
 	close(p.Output)
-	fmt.Println("worker pool gracefully shut down, pool_id:", p.id)
+	log.Println("worker pool gracefully shut down, pool_id:", p.id)
 
 }
 
@@ -84,7 +84,7 @@ func (p *Pool) Close(ctx context.Context) {
 //initialized using pool.Init(). Returns the job id for future use.
 func (p *Pool) AddNewJob(ctx context.Context, input interface{}) (jobID uuid.UUID) {
 	if p.processFunc == nil {
-		panic("process function empty in pool,please initialize using pool.Init()")
+		log.Fatal("process function empty in pool,please initialize using pool.Init()")
 	}
 	jb := newJob(ctx, input)
 	p.input <- jb
