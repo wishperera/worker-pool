@@ -15,7 +15,7 @@ type worker struct {
 //run the Worker as a go routine untill the pool is closed.
 func (w *worker) run() {
 	go func() {
-		log.Println("starting worker, poolID:", w.pool.id, "workerID:", w.id)
+		log.Println("[worker] starting worker, poolID:", w.pool.id, "workerID:", w.id)
 		for job := range w.buffer{
 				res, err := w.pool.processFunc(job.ctx, job.input)
 				log.Println("[worker] processed job, job_id:",job.id,"worker_id:",w.id)

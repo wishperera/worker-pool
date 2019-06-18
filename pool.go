@@ -30,11 +30,11 @@ type Pool struct {
 func NewPool(maxWorkers , workerBufferSize int64, hashFunc domain.HashFunc) (p *Pool, err error) {
 
 	if workerBufferSize < 0 {
-		return nil, errors.New("workerBufferSize must be non negative,provided:" + strconv.FormatInt(workerBufferSize,10))
+		return nil, errors.New("[pool] workerBufferSize must be non negative,provided:" + strconv.FormatInt(workerBufferSize,10))
 	}
 
 	if maxWorkers < 0 {
-		return nil, errors.New("workerBufferSize must be non negative,provided:" + strconv.FormatInt(maxWorkers,10))
+		return nil, errors.New("[pool] workerBufferSize must be non negative,provided:" + strconv.FormatInt(maxWorkers,10))
 	}
 
 	hf,err := selectHash(hashFunc)
@@ -73,7 +73,7 @@ func (p *Pool) Init(ctx context.Context, processFunc func(ctx context.Context, i
 		worker.run()
 		p.wGroup.Add(1)
 	}
-	log.Println("worker pool successfully initialized with, pool_id: ", p.id, "workers_count: ", p.workers, "worker_buffer_size:", p.workerBuffer)
+	log.Println("[pool] worker pool successfully initialized with, pool_id: ", p.id, "workers_count: ", p.workers, "worker_buffer_size:", p.workerBuffer)
 
 }
 
@@ -106,6 +106,6 @@ func selectHash(hashFunc domain.HashFunc)(function domain.HashFunction,err error
 	case SHA256:
 		return hasher.SHA256{},nil
 	default:
-		return function,errors.New("unsupported hash function provided")
+		return function,errors.New("[pool] unsupported hash function provided")
 	}
 }
