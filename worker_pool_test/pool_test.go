@@ -11,7 +11,7 @@ import (
 )
 
 func TestUnitPoolInvalidWorkerSize(t *testing.T){
-	_,err := worker_pool.NewPool(-1,10)
+	_,err := worker_pool.NewPool(-1,10,1)
 	if err != nil{
 		t.Log("[test_case]:[invalid_worker_count]: passed")
 		return
@@ -22,7 +22,7 @@ func TestUnitPoolInvalidWorkerSize(t *testing.T){
 }
 
 func TestUnitPoolInvalidBufferSize(t *testing.T){
-	_,err := worker_pool.NewPool(10,-2)
+	_,err := worker_pool.NewPool(10,-2,1)
 	if err != nil{
 		t.Log("[test_case]:[invalid_buffer_size]: passed")
 		return
@@ -42,7 +42,7 @@ func TestUnitPool(t *testing.T){
 	testInput = append(testInput, "abc")
 	testInput = append(testInput, 0)
 
-	pool,err := worker_pool.NewPool(10,10)
+	pool,err := worker_pool.NewPool(10,10,1)
 	if err != nil{
 		t.Errorf("[test_case]:[invalid_buffer_size]: failed with error: %v",err)
 	}
@@ -61,7 +61,7 @@ func TestUnitPool(t *testing.T){
 	})
 
 	for _,val := range testInput{
-		t.Log("job id:",pool.AddNewJob(context.Background(),val))
+		t.Log("job id:",pool.AddNewJob(context.Background(),val,123123))
 	}
 
 	go func() {

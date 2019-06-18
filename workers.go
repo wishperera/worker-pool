@@ -8,6 +8,7 @@ import (
 type worker struct {
 	id   uuid.UUID
 	pool *Pool
+	buffer chan Job
 }
 
 
@@ -15,24 +16,21 @@ type worker struct {
 func (w *worker) run() {
 	go func() {
 		log.Println("starting worker, poolID:", w.pool.id, "workerID:", w.id)
-		for {
-			select {
-			case job := <-w.pool.input:
+		for job := range w.buffer{
 				res, err := w.pool.processFunc(job.ctx, job.input)
+				log.Println("[worker] processed job, job_id:",job.id,"worker_id:",w.id)
 				w.pool.Output <- Job{
 					ctx:    job.ctx,
 					input:  job.input,
 					id:     job.id,
+					key:    job.key,
 					output: res,
 					err:    err,
 				}
-
-			case _ = <-w.pool.closeWorkers:
-				log.Println("shutting down worker, poolID:", w.pool.id, "workerID:", w.id)
-				w.pool.wGroup.Done()
-				return
 			}
-		}
 
+		log.Println("[worker] shutting down worker, poolID:", w.pool.id, "workerID:", w.id)
+		w.pool.wGroup.Done()
+		return
 	}()
 }

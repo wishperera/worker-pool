@@ -7,6 +7,7 @@ import (
 
 type Job struct {
 	ctx    context.Context
+	key    interface{}   // key must be of type int or string
 	id     uuid.UUID
 	input  interface{}
 	output interface{}
@@ -15,10 +16,11 @@ type Job struct {
 
 
 //Returns a pointer to a Job object with provided input.
-func newJob(ctx context.Context, in interface{}) (j Job) {
+func newJob(ctx context.Context, in,key interface{}) (j Job) {
 	return Job{
 		id:     uuid.New(),
 		input:  in,
+		key:key,
 		output: nil,
 		err:    nil,
 	}
@@ -37,4 +39,9 @@ func (j Job) GetInput() (input interface{}) {
 // returns a id that can uniquely address the job
 func (j Job) GetID() uuid.UUID {
 	return j.id
+}
+
+// return the key associated with the job
+func (j Job)GetKey() interface{}{
+	return j.key
 }
