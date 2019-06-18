@@ -1,13 +1,12 @@
 package worker_pool_test
 
 import (
-	"testing"
-	"github.com/wishperera/worker-pool"
 	"context"
 	"github.com/go-errors/errors"
+	"github.com/wishperera/worker-pool"
 	"reflect"
+	"testing"
 	"time"
-	"fmt"
 )
 
 func TestUnitPoolInvalidWorkerSize(t *testing.T){
@@ -61,7 +60,7 @@ func TestUnitPool(t *testing.T){
 	})
 
 	for _,val := range testInput{
-		t.Log("job id:",pool.AddNewJob(context.Background(),val,123123))
+		t.Log("[test] job id:",pool.AddNewJob(context.Background(),val,123123))
 	}
 
 	go func() {
@@ -69,7 +68,7 @@ func TestUnitPool(t *testing.T){
 			select {
 				case out := <-pool.Output:
 					o, e := out.GetOutput()
-					fmt.Println("id:", out.GetID(),"input:", out.GetInput(),"output:", o, "error:",e)
+					t.Log("[test] id:", out.GetID(),"input:", out.GetInput(),"output:", o, "error:",e)
 
 				case <-endTest:
 					return

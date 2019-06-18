@@ -17,10 +17,10 @@ type workerManager struct {
 
 func (w *workerManager)addWorker(id int64,wkr *worker)(err error){
 	if w.workers == nil{
-		return errors.New("pool is not initialized, please invoke pool.Init()")
+		return errors.New("[manager] pool is not initialized, please invoke pool.Init()")
 	}
 	if _,ok := w.workers[id]; ok{
-		return errors.New("duplicate register request for worker,already exists"+strconv.FormatInt(id,10))
+		return errors.New("[manager] duplicate register request for worker,already exists"+strconv.FormatInt(id,10))
 	}
 	w.workers[id] = wkr
 	return nil
@@ -28,7 +28,7 @@ func (w *workerManager)addWorker(id int64,wkr *worker)(err error){
 
 func (w *workerManager)stopWorkers()(err error){
 	if w.workers == nil{
-		return errors.New("pool is not initialized, please invoke pool.Init()")
+		return errors.New("[manager] pool is not initialized, please invoke pool.Init()")
 	}
 
 	for id := range w.workers{
@@ -54,7 +54,7 @@ func (w  *workerManager)assignJobToWorkers(job Job){
 	}
 	wkr,ok := w.workers[bucketId]
 	if !ok{
-		panic("worker not registered for bucketID")
+		panic("[manager] worker not registered for bucketID")
 	}
 
 	wkr.buffer <- job
@@ -76,7 +76,7 @@ func (w *workerManager)	getHashBucketID(ctx context.Context,key interface{})(buc
 	case reflect.String:
 		str = key.(string)
 	default:
-		return 0, errors.New("key must be either a string or an integer")
+		return 0, errors.New("[manager] key must be either a string or an integer")
 
 	}
 
