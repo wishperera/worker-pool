@@ -100,7 +100,8 @@ func (p *Pool) AddNewJob(ctx context.Context, input,key interface{}) (jobID uuid
 	return jb.id
 }
 
-
+//returns the implementation of the hash fucntion given the id
+// currently supports SHA256,SHA512,MD5
 func selectHash(hashFunc domain.HashFunc)(function domain.HashFunction,err error){
 	switch hashFunc {
 	case SHA256:
