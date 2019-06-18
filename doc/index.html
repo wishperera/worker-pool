@@ -9,14 +9,14 @@
 
 <link type="text/css" rel="stylesheet" href="http://localhost:6060/lib/godoc/style.css">
 
-<link rel="stylesheet" href="http://localhost:6060/lib/godoc/jquery.treeview.css">
+
 <script>window.initFuncs = [];</script>
+
 <script src="http://localhost:6060/lib/godoc/jquery.js" defer></script>
-<script src="http://localhost:6060/lib/godoc/jquery.treeview.js" defer></script>
-<script src="http://localhost:6060/lib/godoc/jquery.treeview.edit.js" defer></script>
 
 
-<script>var goVersion = "go1.8.3";</script>
+
+<script>var goVersion = "go1.12";</script>
 <script src="http://localhost:6060/lib/godoc/godocs.js" defer></script>
 </head>
 <body>
@@ -77,7 +77,7 @@
 	correspond to Go identifiers).
 -->
 
-	<script type='text/javascript'>
+	<script>
 	document.ANALYSIS_DATA = null;
 	document.CALLGRAPH = null;
 	</script>
@@ -92,6 +92,8 @@
 			<dd><a href="index.html#pkg-overview" class="overviewLink">Overview</a></dd>
 			<dd><a href="index.html#pkg-index" class="indexLink">Index</a></dd>
 			
+			
+				<dd><a href="index.html#pkg-subdirectories">Subdirectories</a></dd>
 			
 			</dl>
 		</div>
@@ -122,6 +124,8 @@ golang application.
 			<div id="manual-nav">
 			<dl>
 			
+				<dd><a href="index.html#pkg-constants">Constants</a></dd>
+			
 			
 				<dd><a href="index.html#pkg-variables">Variables</a></dd>
 			
@@ -138,6 +142,9 @@ golang application.
 					<dd>&nbsp; &nbsp; <a href="index.html#Job.GetInput">func (j Job) GetInput() (input interface{})</a></dd>
 				
 					
+					<dd>&nbsp; &nbsp; <a href="index.html#Job.GetKey">func (j Job) GetKey() interface{}</a></dd>
+				
+					
 					<dd>&nbsp; &nbsp; <a href="index.html#Job.GetOutput">func (j Job) GetOutput() (output interface{}, err error)</a></dd>
 				
 			
@@ -145,11 +152,11 @@ golang application.
 				<dd><a href="index.html#Pool">type Pool</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="index.html#NewPool">func NewPool(maxWorkers, buffersize int) (p *Pool, err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="index.html#NewPool">func NewPool(maxWorkers, workerBufferSize int64, hashFunc domain.HashFunc) (p *Pool, err error)</a></dd>
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="index.html#Pool.AddNewJob">func (p *Pool) AddNewJob(ctx context.Context, input interface{}) (jobID uuid.UUID)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="index.html#Pool.AddNewJob">func (p *Pool) AddNewJob(ctx context.Context, input, key interface{}) (jobID uuid.UUID)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#Pool.Close">func (p *Pool) Close(ctx context.Context)</a></dd>
@@ -169,11 +176,15 @@ golang application.
 			<p>
 			<span style="font-size:90%">
 			
+				<a href="http://localhost:6060/src/github.com/wishperera/worker-pool/constants.go">constants.go</a>
+			
 				<a href="http://localhost:6060/src/github.com/wishperera/worker-pool/global.go">global.go</a>
 			
 				<a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go">jobs.go</a>
 			
 				<a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go">pool.go</a>
+			
+				<a href="http://localhost:6060/src/github.com/wishperera/worker-pool/worker_manager.go">worker_manager.go</a>
 			
 				<a href="http://localhost:6060/src/github.com/wishperera/worker-pool/workers.go">workers.go</a>
 			
@@ -183,43 +194,18 @@ golang application.
 		</div><!-- .expanded -->
 		</div><!-- #pkg-index -->
 
-		<div id="pkg-callgraph" class="toggle" style="display: none">
-		<div class="collapsed">
-			<h2 class="toggleButton" title="Click to show Internal Call Graph section">Internal call graph ▹</h2>
-		</div> <!-- .expanded -->
-		<div class="expanded">
-			<h2 class="toggleButton" title="Click to hide Internal Call Graph section">Internal call graph ▾</h2>
-			<p>
-			  In the call graph viewer below, each node
-			  is a function belonging to this package
-			  and its children are the functions it
-			  calls&mdash;perhaps dynamically.
-			</p>
-			<p>
-			  The root nodes are the entry points of the
-			  package: functions that may be called from
-			  outside the package.
-			  There may be non-exported or anonymous
-			  functions among them if they are called
-			  dynamically from another package.
-			</p>
-			<p>
-			  Click a node to visit that function's source code.
-			  From there you can visit its callers by
-			  clicking its declaring <code>func</code>
-			  token.
-			</p>
-			<p>
-			  Functions may be omitted if they were
-			  determined to be unreachable in the
-			  particular programs or tests that were
-			  analyzed.
-			</p>
-			<!-- Zero means show all package entry points. -->
-			<ul style="margin-left: 0.5in" id="callgraph-0" class="treeview"></ul>
-		</div>
-		</div> <!-- #pkg-callgraph -->
+		
 
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				
+				<pre>const (
+    <span id="SHA256">SHA256</span> = <a href="http://localhost:6060/pkg/builtin/#iota">iota</a> + 1
+    <span id="SHA512">SHA512</span>
+    <span id="MD5">MD5</span>
+)</pre>
+			
 		
 		
 			<h2 id="pkg-variables">Variables</h2>
@@ -237,13 +223,16 @@ Reduntant for now.Will be useful for a multiple pool scenario
 		
 			
 			
-			<h2 id="Job">type <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=70:185#L1">Job</a>
+			<h2 id="Job">type <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=70:244#L1">Job</a>
 				<a class="permalink" href="index.html#Job">&#xb6;</a>
+				
+				
 			</h2>
 			
 			<pre>type Job struct {
     <span class="comment">// contains filtered or unexported fields</span>
-}</pre>
+}
+</pre>
 
 			
 
@@ -257,8 +246,10 @@ Reduntant for now.Will be useful for a multiple pool scenario
 
 			
 				
-				<h3 id="Job.GetID">func (Job) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=703:733#L28">GetID</a>
+				<h3 id="Job.GetID">func (Job) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=777:807#L30">GetID</a>
 					<a class="permalink" href="index.html#Job.GetID">&#xb6;</a>
+					
+					
 				</h3>
 				<pre>func (j <a href="index.html#Job">Job</a>) GetID() <a href="http://localhost:6060/pkg/github.com/google/uuid/">uuid</a>.<a href="http://localhost:6060/pkg/github.com/google/uuid/#UUID">UUID</a></pre>
 				<p>
@@ -270,8 +261,10 @@ returns a id that can uniquely address the job
 				
 			
 				
-				<h3 id="Job.GetInput">func (Job) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=588:631#L23">GetInput</a>
+				<h3 id="Job.GetInput">func (Job) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=662:705#L25">GetInput</a>
 					<a class="permalink" href="index.html#Job.GetInput">&#xb6;</a>
+					
+					
 				</h3>
 				<pre>func (j <a href="index.html#Job">Job</a>) GetInput() (input interface{})</pre>
 				<p>
@@ -283,8 +276,25 @@ get the input passed to the process function
 				
 			
 				
-				<h3 id="Job.GetOutput">func (Job) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=454:510#L18">GetOutput</a>
+				<h3 id="Job.GetKey">func (Job) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=868:900#L35">GetKey</a>
+					<a class="permalink" href="index.html#Job.GetKey">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (j <a href="index.html#Job">Job</a>) GetKey() interface{}</pre>
+				<p>
+return the key associated with the job
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Job.GetOutput">func (Job) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/jobs.go?s=528:584#L20">GetOutput</a>
 					<a class="permalink" href="index.html#Job.GetOutput">&#xb6;</a>
+					
+					
 				</h3>
 				<pre>func (j <a href="index.html#Job">Job</a>) GetOutput() (output interface{}, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
 				<p>
@@ -298,14 +308,17 @@ get the output and the error returned by the process function
 		
 			
 			
-			<h2 id="Pool">type <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=238:564#L4">Pool</a>
+			<h2 id="Pool">type <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=326:663#L6">Pool</a>
 				<a class="permalink" href="index.html#Pool">&#xb6;</a>
+				
+				
 			</h2>
 			
 			<pre>type Pool struct {
 <span id="Pool.Output"></span>    Output chan <a href="index.html#Job">Job</a>
     <span class="comment">// contains filtered or unexported fields</span>
-}</pre>
+}
+</pre>
 
 			
 
@@ -317,10 +330,12 @@ get the output and the error returned by the process function
 
 			
 				
-				<h3 id="NewPool">func <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=711:772#L18">NewPool</a>
+				<h3 id="NewPool">func <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=810:906#L20">NewPool</a>
 					<a class="permalink" href="index.html#NewPool">&#xb6;</a>
+					
+					
 				</h3>
-				<pre>func NewPool(maxWorkers, buffersize <a href="http://localhost:6060/pkg/builtin/#int">int</a>) (p *<a href="index.html#Pool">Pool</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<pre>func NewPool(maxWorkers, workerBufferSize <a href="http://localhost:6060/pkg/builtin/#int64">int64</a>, hashFunc <a href="http://localhost:6060/pkg/github.com/wishperera/worker-pool/domain/">domain</a>.<a href="http://localhost:6060/pkg/github.com/wishperera/worker-pool/domain/#HashFunc">HashFunc</a>) (p *<a href="index.html#Pool">Pool</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
 				<p>
 returns a pointer to pool object with the input,output and
 error channels size set to the buffersize and routines count
@@ -333,10 +348,12 @@ limited to workers
 
 			
 				
-				<h3 id="Pool.AddNewJob">func (*Pool) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=2353:2435#L75">AddNewJob</a>
+				<h3 id="Pool.AddNewJob">func (*Pool) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=2740:2826#L84">AddNewJob</a>
 					<a class="permalink" href="index.html#Pool.AddNewJob">&#xb6;</a>
+					
+					
 				</h3>
-				<pre>func (p *<a href="index.html#Pool">Pool</a>) AddNewJob(ctx <a href="http://localhost:6060/pkg/context/">context</a>.<a href="http://localhost:6060/pkg/context/#Context">Context</a>, input interface{}) (jobID <a href="http://localhost:6060/pkg/github.com/google/uuid/">uuid</a>.<a href="http://localhost:6060/pkg/github.com/google/uuid/#UUID">UUID</a>)</pre>
+				<pre>func (p *<a href="index.html#Pool">Pool</a>) AddNewJob(ctx <a href="http://localhost:6060/pkg/context/">context</a>.<a href="http://localhost:6060/pkg/context/#Context">Context</a>, input, key interface{}) (jobID <a href="http://localhost:6060/pkg/github.com/google/uuid/">uuid</a>.<a href="http://localhost:6060/pkg/github.com/google/uuid/#UUID">UUID</a>)</pre>
 				<p>
 adds a new job to the process queue. will panic if the pool is not
 initialized using pool.Init(). Returns the job id for future use.
@@ -347,8 +364,10 @@ initialized using pool.Init(). Returns the job id for future use.
 				
 			
 				
-				<h3 id="Pool.Close">func (*Pool) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=1966:2007#L59">Close</a>
+				<h3 id="Pool.Close">func (*Pool) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=2407:2448#L72">Close</a>
 					<a class="permalink" href="index.html#Pool.Close">&#xb6;</a>
+					
+					
 				</h3>
 				<pre>func (p *<a href="index.html#Pool">Pool</a>) Close(ctx <a href="http://localhost:6060/pkg/context/">context</a>.<a href="http://localhost:6060/pkg/context/#Context">Context</a>)</pre>
 				<p>
@@ -360,8 +379,10 @@ shut down the pool gracefully after waiting all worker routines to close.
 				
 			
 				
-				<h3 id="Pool.Init">func (*Pool) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=1445:1569#L40">Init</a>
+				<h3 id="Pool.Init">func (*Pool) <a href="http://localhost:6060/src/github.com/wishperera/worker-pool/pool.go?s=1765:1889#L51">Init</a>
 					<a class="permalink" href="index.html#Pool.Init">&#xb6;</a>
+					
+					
 				</h3>
 				<pre>func (p *<a href="index.html#Pool">Pool</a>) Init(ctx <a href="http://localhost:6060/pkg/context/">context</a>.<a href="http://localhost:6060/pkg/context/#Context">Context</a>, processFunc func(ctx <a href="http://localhost:6060/pkg/context/">context</a>.<a href="http://localhost:6060/pkg/context/#Context">Context</a>, in interface{}) (out interface{}, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>))</pre>
 				<p>
@@ -382,10 +403,53 @@ parameter can be a single value or a structure in case of multiple expected inpu
 
 
 
+	
+	
+		<h2 id="pkg-subdirectories">Subdirectories</h2>
+	
+	<div class="pkg-dir">
+		<table>
+			<tr>
+				<th class="pkg-name">Name</th>
+				<th class="pkg-synopsis">Synopsis</th>
+			</tr>
+
+			
+			<tr>
+				<td colspan="2"><a href="http://localhost:6060/pkg/github.com/wishperera/">..</a></td>
+			</tr>
+			
+
+			
+				<tr>
+				
+					<td class="pkg-name" style="padding-left: 0px;">
+						<a href="http://localhost:6060/pkg/github.com/wishperera/worker-pool/domain/">domain</a>
+					</td>
+				
+					<td class="pkg-synopsis">
+						
+					</td>
+				</tr>
+			
+				<tr>
+				
+					<td class="pkg-name" style="padding-left: 0px;">
+						<a href="http://localhost:6060/pkg/github.com/wishperera/worker-pool/hasher/">hasher</a>
+					</td>
+				
+					<td class="pkg-synopsis">
+						
+					</td>
+				</tr>
+			
+		</table>
+	</div>
+
 
 
 <div id="footer">
-Build version go1.8.3.<br>
+Build version go1.12.<br>
 Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
 the content of this page is licensed under the
 Creative Commons Attribution 3.0 License,
@@ -396,6 +460,7 @@ and code is licensed under a <a href="http://localhost:6060/LICENSE">BSD license
 
 </div><!-- .container -->
 </div><!-- #page -->
+
 </body>
 </html>
 
