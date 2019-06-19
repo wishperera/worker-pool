@@ -13,11 +13,42 @@ import (
 	"sync"
 )
 
+
+type poolConfig struct {
+	Workers int64
+	WorkerBufferSize int64
+	EnableMetrics bool
+	Metrics struct{
+		NameSpace string
+		SubSystem string
+	}
+	HashFunc domain.HashFunc
+}
+
+// default pool  config
+var DefaultConfig poolConfig
+
+func init(){
+	DefaultConfig = poolConfig{
+		Workers: 100,
+		WorkerBufferSize: 10,
+		HashFunc:SHA256,
+		EnableMetrics: true,
+	}
+	DefaultConfig.Metrics.NameSpace = "worker_pool"
+	DefaultConfig.Metrics.SubSystem = "sub_system"
+}
+
+// return an empty pool config
+func NewPoolConfig()poolConfig{
+	return poolConfig{}
+}
+
+
 type Pool struct {
 	id           uuid.UUID
 	Output       chan Job
-	workers      int64 // maximum number of workers
-	workerBuffer int64 // buffer size for worker channels
+	conf         poolConfig
 	processFunc  func(ctx context.Context, in interface{}) (out interface{}, err error)
 	wGroup       sync.WaitGroup
 	closeWorkers chan bool
@@ -27,17 +58,14 @@ type Pool struct {
 //returns a pointer to pool object with the input,output and
 //error channels size set to the buffersize and routines count
 //limited to workers
-func NewPool(maxWorkers , workerBufferSize int64, hashFunc domain.HashFunc) (p *Pool, err error) {
+func NewPool(conf poolConfig) (p *Pool, err error) {
 
-	if workerBufferSize < 0 {
-		return nil, errors.New("[pool] workerBufferSize must be non negative,provided:" + strconv.FormatInt(workerBufferSize,10))
+	err = validatePoolConfig(conf)
+	if err != nil{
+		return nil,err
 	}
 
-	if maxWorkers < 0 {
-		return nil, errors.New("[pool] workerBufferSize must be non negative,provided:" + strconv.FormatInt(maxWorkers,10))
-	}
-
-	hf,err := selectHash(hashFunc)
+	hf,err := selectHash(conf.HashFunc)
 	if err != nil{
 		return nil,err
 	}
@@ -45,10 +73,9 @@ func NewPool(maxWorkers , workerBufferSize int64, hashFunc domain.HashFunc) (p *
 	return &Pool{
 		Output:       make(chan Job),
 		closeWorkers: make(chan bool),
-		workers:      maxWorkers,
-		workerBuffer:   workerBufferSize,
+		conf: conf,
 		manager: workerManager{
-			buckets: maxWorkers,
+			buckets: conf.Workers,
 			hashfunc: hf,
 			workers: make(map[int64]*worker,0),
 		},
@@ -62,18 +89,23 @@ func (p *Pool) Init(ctx context.Context, processFunc func(ctx context.Context, i
 	p.processFunc = processFunc
 	p.id = uuid.New()
 	var i int64
-	for i = 0; i < p.workers; i++ {
+
+	if p.conf.EnableMetrics{
+		initMetrics(p)
+	}
+
+	for i = 0; i < p.conf.Workers; i++ {
 		worker := &worker{
 			id:   uuid.New(),
 			pool: p,
-			buffer: make(chan Job,p.workerBuffer),
+			buffer: make(chan Job,p.conf.WorkerBufferSize),
 		}
 		p.manager.pool = p
 		p.manager.addWorker(i,worker)
 		worker.run()
 		p.wGroup.Add(1)
 	}
-	log.Println("[pool] worker pool successfully initialized with, pool_id: ", p.id, "workers_count: ", p.workers, "worker_buffer_size:", p.workerBuffer)
+	log.Println("[pool] worker pool successfully initialized with, pool_id: ", p.id, "workers_count: ", p.conf.Workers, "worker_buffer_size:", p.conf.WorkerBufferSize)
 
 }
 
@@ -97,6 +129,9 @@ func (p *Pool) AddNewJob(ctx context.Context, input,key interface{}) (jobID uuid
 	}
 	jb := newJob(ctx, input,key)
 	p.manager.assignJobToWorkers(jb)
+	if p.conf.EnableMetrics{
+		activeJobs.Add(1)
+	}
 	return jb.id
 }
 
@@ -109,4 +144,28 @@ func selectHash(hashFunc domain.HashFunc)(function domain.HashFunction,err error
 	default:
 		return function,errors.New("[pool] unsupported hash function provided")
 	}
+}
+
+
+//validate the config information
+func validatePoolConfig(cf poolConfig)(err error){
+	if cf.WorkerBufferSize < 0 {
+		return errors.New("[pool] number of workers must be non negative,provided:" + strconv.FormatInt(cf.Workers,10))
+	}
+
+	if cf.Workers < 0 {
+		return  errors.New("[pool] workerBufferSize must be non negative,provided:" + strconv.FormatInt(cf.WorkerBufferSize,10))
+	}
+
+	if cf.EnableMetrics {
+		if !(len(cf.Metrics.NameSpace) > 0) {
+			return errors.New("[pool] metric namespace not provided")
+		}
+
+		if !(len(cf.Metrics.SubSystem) > 0) {
+			return errors.New("[pool] metric subsystem not provided")
+		}
+	}
+
+	return nil
 }

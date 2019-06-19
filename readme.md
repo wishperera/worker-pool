@@ -19,11 +19,15 @@ in which case you must implement your own logic to avoid race conditions.
 - creating a new pool and initializing with a process function
 
     ```go
-    var workerCount = 10
-    var workerBufferSize  = 10
-    var hashFunction = SHA256
+    
+    conf := worker_pool.NewPoolConfig()
+    conf.Workers = 100
+    conf.WorkerBufferSize = 10
+    conf.Metrics.NameSpace = "test_namespace"
+    conf.Metrics.SubSystem = "test_subsystem"
+    conf.HashFunc = worker_pool.SHA256
   
-    pool,err := worker_pool.NewPool(workerCount,workerBufferSize,hashFunction)
+    pool,err := worker_pool.NewPool(conf)
     if err != nil{
   	    //todo- handle error as preffered
     }
@@ -34,9 +38,20 @@ in which case you must implement your own logic to avoid race conditions.
     })
   
     ```
-- `workerCount` refers to the number of workers(spawned in go routines) running parellely, and `workerBufferSize` refers to the size of 
+- `conf.Workers` refers to the number of workers(spawned in go routines) running in parallel, and `conf.WorkerBufferSize` refers to the size of 
    the workers buffered channel.
    
+- `conf.HashFunc` refers to the bucket hashing algorithm used by job manager
+- `conf.Metrics` is used to set the prometheus metric name space and subsystem for pool metrics
+- `worker_pool.DefaultConfig` can be passed as the config for worker_pool.NewPool() function in which case the 
+  defaults will be as follows
+    ```
+        Workers           = 100
+        WorkerBufferSize  = 10
+        Metrics.NameSpace = "worker_pool"
+        Metrics.SubSystem = "worker_pool"
+        HashFunc          =  worker_pool.SHA256
+    ```
 -  adding jobs to the pool 
     
     ```go

@@ -3,6 +3,7 @@ package worker_pool
 import (
 	"log"
 	"github.com/google/uuid"
+	"time"
 )
 
 type worker struct {
@@ -17,7 +18,12 @@ func (w *worker) run() {
 	go func() {
 		log.Println("[worker] starting worker, poolID:", w.pool.id, "workerID:", w.id)
 		for job := range w.buffer{
+				st := time.Now()
 				res, err := w.pool.processFunc(job.ctx, job.input)
+				if w.pool.conf.EnableMetrics{
+					processLatency.Observe(float64(time.Now().Sub(st).Nanoseconds())/1e3)
+				}
+
 				log.Println("[worker] processed job, job_id:",job.id,"worker_id:",w.id)
 				w.pool.Output <- Job{
 					ctx:    job.ctx,

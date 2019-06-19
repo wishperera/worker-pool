@@ -10,7 +10,15 @@ import (
 )
 
 func TestUnitPoolInvalidWorkerSize(t *testing.T){
-	_,err := worker_pool.NewPool(-1,10,1)
+
+	conf := worker_pool.NewPoolConfig()
+	conf.Workers = -1
+	conf.WorkerBufferSize = 10
+	conf.Metrics.NameSpace = "test"
+	conf.Metrics.SubSystem = "test"
+	conf.HashFunc = worker_pool.SHA256
+
+	_,err := worker_pool.NewPool(conf)
 	if err != nil{
 		t.Log("[test_case]:[invalid_worker_count]: passed")
 		return
@@ -21,7 +29,15 @@ func TestUnitPoolInvalidWorkerSize(t *testing.T){
 }
 
 func TestUnitPoolInvalidBufferSize(t *testing.T){
-	_,err := worker_pool.NewPool(10,-2,1)
+
+	conf := worker_pool.NewPoolConfig()
+	conf.Workers = 100
+	conf.WorkerBufferSize = -10
+	conf.Metrics.NameSpace = "test"
+	conf.Metrics.SubSystem = "test"
+	conf.HashFunc = worker_pool.SHA256
+
+	_,err := worker_pool.NewPool(conf)
 	if err != nil{
 		t.Log("[test_case]:[invalid_buffer_size]: passed")
 		return
@@ -41,9 +57,10 @@ func TestUnitPool(t *testing.T){
 	testInput = append(testInput, "abc")
 	testInput = append(testInput, 0)
 
-	pool,err := worker_pool.NewPool(10,10,1)
+	pool,err := worker_pool.NewPool(worker_pool.DefaultConfig)
 	if err != nil{
 		t.Errorf("[test_case]:[invalid_buffer_size]: failed with error: %v",err)
+		return
 	}
 
 	//
