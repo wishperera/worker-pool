@@ -1,4 +1,4 @@
-package worker_pool_test
+package tests
 
 import (
 	"context"
