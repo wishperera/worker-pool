@@ -17,7 +17,6 @@ import (
 type poolConfig struct {
 	Workers int64
 	WorkerBufferSize int64
-	EnableMetrics bool
 	Metrics struct{
 		NameSpace string
 		SubSystem string
@@ -33,7 +32,6 @@ func init(){
 		Workers: 100,
 		WorkerBufferSize: 10,
 		HashFunc:SHA256,
-		EnableMetrics: true,
 	}
 	DefaultConfig.Metrics.NameSpace = "worker_pool"
 	DefaultConfig.Metrics.SubSystem = "sub_system"
