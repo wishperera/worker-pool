@@ -20,9 +20,7 @@ func (w *worker) run() {
 		for job := range w.buffer{
 				st := time.Now()
 				res, err := w.pool.processFunc(job.ctx, job.input)
-				if w.pool.conf.EnableMetrics{
-					processLatency.Observe(float64(time.Now().Sub(st).Nanoseconds())/1e3)
-				}
+				processLatency.Observe(float64(time.Now().Sub(st).Nanoseconds())/1e3)
 
 				log.Println("[worker] processed job, job_id:",job.id,"worker_id:",w.id)
 				w.pool.Output <- Job{

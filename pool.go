@@ -90,9 +90,7 @@ func (p *Pool) Init(ctx context.Context, processFunc func(ctx context.Context, i
 	p.id = uuid.New()
 	var i int64
 
-	if p.conf.EnableMetrics{
-		initMetrics(p)
-	}
+	initMetrics(p)
 
 	for i = 0; i < p.conf.Workers; i++ {
 		worker := &worker{
@@ -129,9 +127,7 @@ func (p *Pool) AddNewJob(ctx context.Context, input,key interface{}) (jobID uuid
 	}
 	jb := newJob(ctx, input,key)
 	p.manager.assignJobToWorkers(jb)
-	if p.conf.EnableMetrics{
-		activeJobs.Add(1)
-	}
+	activeJobs.Add(1)
 	return jb.id
 }
 
@@ -157,15 +153,15 @@ func validatePoolConfig(cf poolConfig)(err error){
 		return  errors.New("[pool] workerBufferSize must be non negative,provided:" + strconv.FormatInt(cf.WorkerBufferSize,10))
 	}
 
-	if cf.EnableMetrics {
-		if !(len(cf.Metrics.NameSpace) > 0) {
-			return errors.New("[pool] metric namespace not provided")
-		}
 
-		if !(len(cf.Metrics.SubSystem) > 0) {
-			return errors.New("[pool] metric subsystem not provided")
-		}
+	if !(len(cf.Metrics.NameSpace) > 0) {
+		return errors.New("[pool] metric namespace not provided")
 	}
+
+	if !(len(cf.Metrics.SubSystem) > 0) {
+		return errors.New("[pool] metric subsystem not provided")
+	}
+
 
 	return nil
 }
